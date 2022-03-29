@@ -1,0 +1,377 @@
+{% extends 'home/admin-layout.html' %}
+{% load static %}
+
+{% load custom_tags %}
+
+
+
+{% block ExtraCss %}
+<style>
+  #data-table-cont {
+    border-radius: 20px !important;
+    box-shadow: 1px 1px 5px -2px rgba(0,0,0,.5);
+    margin: 2rem 0px;
+  }
+  #data-table {
+    overflow: hidden;
+  }
+  #data-table th {
+    cursor:pointer;
+    user-select: none;
+    min-width: 100px !important;
+  }
+  #data-table thead tr {
+    background-color: #fff !important;
+    padding: 2rem !important;
+  }
+  #data-table thead tr th {
+    border-top: none;
+    background-color: #fff;
+    vertical-align: middle;
+  }
+  #data-table tbody tr {
+    background-color: #fff;
+  }
+  
+  #data-table tbody tr td {
+    padding: 1rem !important;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    vertical-align: middle;
+  }
+</style>
+{% endblock ExtraCss %}
+
+{% block content %}
+
+{% block header %}
+{% endblock header %}
+
+<section class="container my-5">
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <form method="GET">
+              {% comment %} cryptocurrency
+              ticker
+              order_by {% endcomment %}
+              <div class="row align-items-end">
+                <div class="col-4">
+                  <div id="div_crypto_currency" class="form-group">
+                      <label for="crypto_currency">Crypto Currency</label>
+                      <div>
+                        <input type="text" name="crypto_currency" class="textinput textInput form-control" id="id_cryptocurrency">
+                      </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div id="div_ticker" class="form-group">
+                      <label for="ticker">Ticker</label>
+                      <div>
+                        <input type="text" name="ticker" class="textinput textInput form-control" id="id_ticker">
+                      </div>
+                  </div>
+                </div>
+                <div class="col-4 text-start">
+                  <button class="btn btn-primary" type="submit">Filter</button>
+                </div>
+              </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 p-0" style="overflow-x: auto;" id="data-table-cont">
+          <table class="table table-stripped" id="data-table">
+            <thead>
+                <tr class="header">
+                    <th style="min-width: 100px;">Cryptocurrency</th>
+                    <th style="min-width: 100px;">Ticker</th>
+                    <th style="min-width: 100px;" onclick="sortTable(2)" data-direction="asc">Yesterday Total</th>
+                    <th style="min-width: 100px;" onclick="sortTable(3)" data-direction="asc">Today Total</th>
+                    <th style="min-width: 100px;" onclick="sortTable(4)" data-direction="asc">Difference</th>
+                    <th style="min-width: 100px;" onclick="sortTable(5)" data-direction="asc">Difference Icospeaks</th>
+                    <th style="min-width: 100px;" onclick="sortTable(6)" data-direction="asc">Difference Cryptocom</th>
+                    <th style="min-width: 100px;" onclick="sortTable(7)" data-direction="asc">Difference Coinmarket</th>
+                    <th style="min-width: 130px;">7 Days Difference</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in data %}
+                <tr> 
+                    <td>{{entry.cryptocurrency}}</td>
+                    <td>{{entry.ticker}}</td>
+                    <td>
+                      {% with entry|get_field:"yesterday_total" as value %}
+                        <span style="white-space: nowrap;">
+                          {{value|floatformat:2}}
+                        </span>
+                      {% endwith %}
+                    </td>
+                    <td>
+                      {% with entry|get_field:"today_total" as value %}
+                        <span style="white-space: nowrap;">
+                          {{value|floatformat:2}}
+                        </span>
+                      {% endwith %}
+                    </td>
+                    <td>
+                      {% with entry|get_field:"difference" as value %}
+                        {% if value|compareInt:"0" %}
+                          <span class="text-success" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-up"></i>
+                        {% else %}
+                          <span class="text-danger" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-down"></i>
+                        {% endif %}
+                          {{value|floatformat:2}}
+                          </span>
+                      {% endwith %}
+                    </td>
+                    <td>
+                      {% with entry|get_field_analytics:"today_icospeaks" as value %}
+                        {% if value.weekly|compareInt:"0" %}
+                          <span class="text-success" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-up"></i>
+                        {% else %}
+                          <span class="text-danger" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-down"></i>
+                        {% endif %}
+                          {{value.weekly|floatformat:2}}
+                          </span>
+                      {% endwith %}
+                    </td>
+                    <td>
+                      {% with entry|get_field_analytics:"today_cryptocom" as value %}
+                        {% if value.weekly|compareInt:"0" %}
+                          <span class="text-success" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-up"></i>
+                        {% else %}
+                          <span class="text-danger" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-down"></i>
+                        {% endif %}
+                          {{value.weekly|floatformat:2}}
+                          </span>
+                      {% endwith %}
+                    </td>
+                    <td>
+                      {% with entry|get_field_analytics:"today_coinmarket" as value %}
+                        {% if value.weekly|compareInt:"0" %}
+                          <span class="text-success" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-up"></i>
+                        {% else %}
+                          <span class="text-danger" style="white-space: nowrap;">
+                          <i class="fas fa-chevron-down"></i>
+                        {% endif %}
+                          {{value.weekly|floatformat:2}}
+                          </span>
+                      {% endwith %}
+                    </td>
+                    <td class="d-flex">
+                      <a href="{% url 'ViewDataChartAnalytics' data_id=entry.id field='difference' %}" class="w-100">
+                        <canvas id="myChart-{{entry.id}}" height="100px" style="max-width: 100%;"></canvas>
+                      </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+
+        </div>
+        <div class="col-12">
+          <div class="pagination">
+            <span class="step-links">
+                {% if data.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ data.previous_page_number }}">previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ data.number }} of {{ data.paginator.num_pages }}.
+                </span>
+        
+                {% if data.has_next %}
+                    <a href="?page={{ data.next_page_number }}">next</a>
+                    <a href="?page={{ data.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+          </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
+
+{% block ExtraJs %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  function sortTable(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("data-table");
+      switching = true;
+      // Set the sorting direction to ascending:
+      dir = table.rows[0].getElementsByTagName("TH")[n].getAttribute("data-direction")
+      nextDir = dir == "asc" ? "desc" : "asc"
+      //dir = "asc";
+      /* Make a loop that will continue until
+      no switching has been done: */
+      while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        //.getAttribute("data-direction");
+        /* Loop through all table rows (except the
+        first, which contains table headers): */
+        for (i = 1; i < (rows.length - 1); i++) {
+          // Start by saying there should be no switching:
+          shouldSwitch = false;
+          /* Get the two elements you want to compare,
+          one from current row and one from the next: */
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          /* Check if the two rows should switch place,
+          based on the direction, asc or desc: */
+          if (dir == "asc") {
+            if (Number(x.innerText) > Number(y.innerText)) {
+              shouldSwitch = true;
+              break;
+            }
+            {% comment %}
+            if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
+              // If so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+            {% endcomment %}
+          } else if (dir == "desc") {
+            if (Number(x.innerText) < Number(y.innerText)) {
+              shouldSwitch = true;
+              break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          /* If a switch has been marked, make the switch
+          and mark that a switch has been done: */
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          // Each time a switch is done, increase this count by 1:
+          switchcount ++;
+        } else {
+          /* If no switching has been done AND the direction is "asc",
+          set the direction to "desc" and run the while loop again. */
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+      table.rows[0].getElementsByTagName("TH")[n].setAttribute("data-direction", nextDir)
+  }
+</script>
+
+
+<script>
+  function getGradient(ctx, chartArea) {
+      const chartWidth = chartArea.right - chartArea.left;
+      const chartHeight = chartArea.bottom - chartArea.top;
+      if (!gradient || width !== chartWidth || height !== chartHeight) {
+          // Create the gradient because this is either the first render
+          // or the size of the chart has changed
+          width = chartWidth;
+          height = chartHeight;
+          gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+          gradient.addColorStop(0, "red");
+          gradient.addColorStop(0.40, "red");
+          gradient.addColorStop(0.40, "#16c784");
+          gradient.addColorStop(1, "#16c784");
+      }
+      return gradient;
+  }
+
+  let width, height, gradient;
+  let data = {};
+  let ctx ;
+  let myChart ;
+  let config ;
+  {% for entry in data %}
+    {% with entry|get_field_cart_data:"difference" as chart_data %}
+
+      data = {
+        labels: {{chart_data.labels|safe}},
+        datasets: [{
+          label: '{{field}}',
+          backgroundColor: "#fff",
+          borderColor: function(context) {
+              const chart = context.chart;
+              const {ctx, chartArea} = chart;
+
+              if (!chartArea) {
+                // This case happens on initial chart load
+                return;
+              }
+              return getGradient(ctx, chartArea);
+          },
+          fill: false,
+          data: {{chart_data.data|safe}},
+        }]
+      };
+
+      config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: false,
+            layout: {
+              padding: 0,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    display: false,
+                },
+                title: {
+                    display: false,
+                },
+                tooltip: {
+                  enabled: false,
+                },
+            },
+            scales: {
+                x: {
+                  grid: {
+                    display: false,
+                    drawBorder: false,
+                  },
+                  ticks: {
+                    display: false
+                  }
+                },
+                y: {
+                  grid: {
+                      display: false,
+                      drawBorder: false,
+                  },
+                  ticks: {
+                    display: false
+                  }
+                }
+            },
+            elements: {
+                point: {
+                  radius: "1",
+                  pointStyle: 'circle',
+                  hoverRadius: "1",
+                }
+            }
+        }
+      }
+
+      ctx = document.getElementById('myChart-{{entry.id}}').getContext('2d');
+      myChart = new Chart(ctx, config);
+    {% endwith %}
+  {% endfor %}
+</script>
+
+{% endblock ExtraJs %}

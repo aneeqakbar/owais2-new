@@ -1,0 +1,46 @@
+{% extends 'home/layout.html' %}
+{% block title %}Unlock Data{% endblock %}
+
+{% block content %}
+<section id="content">
+    <div class="content-wrap">
+        <div class="container clearfix">
+            <div class="tabs mx-auto mb-0 clearfix ui-tabs ui-corner-all ui-widget ui-widget-content"
+                id="tab-login-register" style="max-width: 500px;">
+                <div class="tab-container">
+                    <div class="tab-content ui-tabs-panel ui-corner-bottom ui-widget-content" id="tab-login"
+                        aria-labelledby="ui-id-1" role="tabpanel" aria-hidden="false">
+                        <div class="card mb-0">
+                            <div class="card-body" style="padding: 40px;">
+                                <form id="login-form" name="login-form" class="mb-0" action="." method="post">
+                                    {%csrf_token%}
+                                    <p class="text-danger">
+                                        The password is hardcoded its '<span class="text-success">123</span>' For now.
+                                    </p>
+                                    <h3>Unlock This Data</h3>
+                                    <div class="row">
+                                        <div class="col-12 form-group">
+                                            <label for="login-form-password">Password:</label>
+                                            <input type="hidden" name="code" value="{{code}}">
+                                            <input type="hidden" name="slug" value="{{slug}}">
+                                            <input type="password" id="login-form-password" name="password"
+                                            value="" class="form-control">
+                                            {% if alert %}
+                                            <p style="color: red;">{{alert}}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-12 form-group">
+                                            <button class="button button-3d button-black m-0" id="login-form-submit"
+                                                name="login-form-submit" value="login">Unlock</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
