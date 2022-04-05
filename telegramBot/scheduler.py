@@ -142,9 +142,9 @@ def start_jobs():
     
     #Set cron to runs every 20 min.
     # cron_job = {'month': '*', 'day': '*', 'hour': '*', 'minute':'*/20'}
-    # fetch_telegram_data_a()
-    # fetch_telegram_data_b()
-    # fetch_reddit_data()
+ #   fetch_telegram_data_a()
+#    fetch_telegram_data_b()
+  #  fetch_reddit_data()
     #Add our task to scheduler.
     # scheduler.add_job(some_task, 'cron', **cron_job)
     # scheduler.add_job(some_task, 'interval', seconds=30)

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-267tags5r3%9=w*xao0&g)tq4)mi=ixj%99ix*bo2)2i=v+qla
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["smart.thevinexperts.com","localhost","127.0.0.1"]
+ALLOWED_HOSTS = ["smart.thevinexperts.com","localhost","127.0.0.1", "*"]
 
 
 # Application definition
@@ -97,6 +97,12 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
