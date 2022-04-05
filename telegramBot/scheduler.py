@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.files.storage import FileSystemStorage
 import os.path
-from scrapper.cron import fetch_telegram_data, fetch_reddit_data
+from scrapper.cron import fetch_telegram_b_data, fetch_telegram_data, fetch_reddit_data
 from telegramBot.models import Telegram_Accounts
 from telegramBot.models import Telegram_Groups
 from telegramBot.models import Telegram_Questions
@@ -130,25 +130,15 @@ def telegram_client(phone, api_id, api_hash):
     return client
 
 
-def fetch_telegram_data_a():
-    fetch_telegram_data(code="A")
-def fetch_telegram_data_b():
-    fetch_telegram_data(code="B")
-
-# from jobs import some_task
-# from views import Job1 as some_task
 def start_jobs():
     scheduler = BackgroundScheduler()
-    
+    # fetch_telegram_data()
+    # fetch_telegram_b_data()
+    # fetch_reddit_data()
+
     #Set cron to runs every 20 min.
     # cron_job = {'month': '*', 'day': '*', 'hour': '*', 'minute':'*/20'}
-    # fetch_telegram_data_a()
-    # fetch_telegram_data_b()
-    # fetch_reddit_data()
     #Add our task to scheduler.
     # scheduler.add_job(some_task, 'cron', **cron_job)
-    # scheduler.add_job(some_task, 'interval', seconds=30)
-    # scheduler.add_job(fetch_telegram_data_a, 'interval', seconds=180)
     # scheduler.add_job(fetch_telegram_data_b, 'interval', seconds=180)
-    #And finally start.
     scheduler.start()
