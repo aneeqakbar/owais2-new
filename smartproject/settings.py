@@ -87,15 +87,15 @@ WSGI_APPLICATION = 'smartproject.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': {
-            'service': 'django_db',
-            'passfile': '.my_pgpass',
-        },
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'OPTIONS': {
+#             'service': 'django_db',
+#             'passfile': '.my_pgpass',
+#         },
+#     }
+# }
 
 DATABASES = {
     'default': {
