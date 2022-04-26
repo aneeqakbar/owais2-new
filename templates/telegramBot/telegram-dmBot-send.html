@@ -1,0 +1,366 @@
+{% extends 'telegramBot/user-layout.html' %}
+{% block head %}
+<style>
+    #example1 {
+  font-size: 0.8em;
+}
+  #response-btn{
+    font-size: 0.8em;
+  }
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  border-top: 16px solid blue;
+  border-right: 16px solid green;
+  border-bottom: 16px solid red;
+  border-left: 16px solid pink;
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+<style>
+    
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 50%; /* Full width */
+  height: 50%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 10px auto; /* 15% from the top and centered */
+  padding: 80px;
+  border: 1px solid #888;
+  width: 100%; /* Could be more or less, depending on screen size */
+  max-height: 100%;
+overflow-y: auto;
+}
+
+/* The Close Button */
+.close1 {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close2 {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close1:hover,
+.close1:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+.close2:hover,
+.close2:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+.close3 {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+.close3:hover,
+.close3:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+{% endblock %}
+{% block heading %} 
+Telegram DM BOT send {{category.capitalize}}  <button id="groupBtn" class="ml-4 btn btn-outline-dark">Manage Groups</button><a href="/telegramBot/schedule-messages"><button class="ml-2 btn btn-outline-dark">Schedule Messages</button></a>
+{% endblock %}
+{% block content %}
+{% if sent == 'true' %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>Success!</strong> Your {{category.capitalize}} has sent to {{group_name}}.
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endif %}
+<!-- The add new group modal -->
+<div id="groupModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close1">&times;</span>
+    <div class="">
+      <form action="/telegramBot/telegram-bot-add-group/question" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="exampleInputEmail1">Group Name:</label>
+          <input type="text" class="form-control" name="group_name" id="exampleInputEmail1" aria-describedby="emailHelp">
+          <input hidden type="text" class="form-control" name="account_id" id="exampleInputEmail2" aria-describedby="emailHelp" value="{{account.0.id}}">
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+    <div class="groups">
+      
+<div class="table-responsive">      
+  <h2>Groups</h2>
+  <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+      <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Group Name</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in groups %}
+          <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{i.group_name}}</td>
+            <td><a href="/telegramBot/delete-telegram-groups/{{i.id}}"><button onclick="deleteAlert()" type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+  </table>
+</div>
+    </div>
+  </div>
+
+</div>
+<!-- group modal end -->
+
+
+<div class="table-responsive">   
+  <!-- <h2>Tabular form</h2> -->
+  <table id="example1" class="display compact hover nowrap table table-bordered table-striped" style="width: 100%;">
+      <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Message</th>
+            <th scope="col">Account</th>
+            <th scope="col">Group</th>
+            <th scope="col">Delay (sec)</th>
+            <th scope="col">DateTime</th>
+            <th scope="col">Status</th>
+            <th scope="col">Send</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <th scope="row">1</th>
+            <td><input type="text" class="form-control" name="chat" id="chat1" aria-describedby="emailHelp"></td>
+            <td><select id="account1" type="text" class="form-control" name="account" aria-describedby="emailHelp" placeholder="Select account" required>
+              {% for i in accounts %}
+              <option value="{{i.id}}">{{i.number}}</option>
+              {% endfor %}
+          </select></td>
+            <td><select id="group_name1" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+              {% for i in groups %}
+              <option value="{{i.group_name}}">{{i.group_name}}</option>
+              {% endfor %}
+          </select></td>
+          <!-- <td style="width: 15%;"><input type="number" class="form-control w-50" name="sleep_time_first" id="sleep_time_first" aria-describedby="emailHelp"></td> -->
+          <td style="width: 15%;"><select id="delay1" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="1000">1000</option>
+            <option value="5000">5000</option>
+            <option value="10000">10000</option>
+            <option value="20000">20000</option>
+        </select></td>
+        <td><input type="datetime-local" id="birthdaytime1" class="form-control" name="datetime"></td>
+        <td><button style="display: none;" id="response-btn1" class=""></button></td>
+            <td><button id="response1" class="btn btn-dark" onclick="send(i=1)">Send</button></td>
+          </tr>
+        </tbody>
+  </table>
+  <div id="add-more">
+    <button onclick="addmore(i=2)" class="btn btn-dark btn-sm">+</button></div>
+</div>
+<!-- <div id="response" class="my-2" style="display: none;"> 
+  <button id="response-btn" class=""></button>
+</div> -->
+{% endblock %}
+{% block scripts %} 
+
+
+<script>
+    // Get the modal
+var modal1 = document.getElementById("groupModal");
+
+// Get the button that opens the modal
+var btn1 = document.getElementById("groupBtn");
+
+// Get the <span> element that closes the modal
+var span1 = document.getElementsByClassName("close1")[0];
+
+// When the user clicks on the button, open the modal
+btn1.onclick = function() {
+    modal1.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span1.onclick = function() {
+  modal1.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal1) {
+    modal1.style.display = "none";
+  }
+}
+  </script>
+
+  <script>
+    function send(i){
+      
+      // respone_div = document.getElementById("response");
+      response_btn = document.getElementById("response-btn"+i);
+      response_btn.className = "btn btn-lg btn-secondary";
+      response_btn.innerText = "Running";
+      response_btn.style.display = "block";
+
+      message = document.getElementById("chat"+i).value;
+      var group_name = document.getElementById("group_name"+i);
+      var group_name_value = group_name.value;
+      var account_id = document.getElementById("account"+i)
+      var account_id_value = account_id.value;
+      delay = document.getElementById("delay"+i).value;
+      datetime = document.getElementById("birthdaytime"+i).value;
+      console.log(message);
+      console.log(group_name_value);
+      console.log(delay);
+      console.log(account_id_value);
+      console.log(datetime);
+      if (message && datetime && group_name_value && delay && account_id_value ) {
+        console.log("all recieved");
+        // ajax
+      $.ajax({
+          url: "/telegramBot/send-chat/{{account.0.id}}",
+          type: "POST",
+          data: { group_name: group_name_value,account_id:account_id_value,message:message,delay:delay, datetime:datetime ,csrfmiddlewaretoken: "{{ csrf_token }}" },
+          success: function (response) {
+            respone_div = document.getElementById("response"+i);
+            response_btn = document.getElementById("response-btn"+i);
+            if( response !== 'Scheduled' ) {
+                    error = response;
+                  response_btn.className = "btn btn-danger";
+                  response_btn.innerText = error;
+          } else {
+                  response_btn.className = "btn btn-success";
+                  response_btn.innerText = response;
+          }
+            respone_div.style.display = "block";
+            
+            console.log(response)
+          },
+          error: function (error) {
+            respone_div = document.getElementById("response"+i);
+            response_btn = document.getElementById("response-btn"+i);
+            // response_btn.classList.add("btn-danger");
+            response_btn.className = "btn btn-danger";
+            response_btn.innerText = error;
+            respone_div.style.display = "block";
+            
+            console.log(error)
+          },
+        }).done(function (response) {
+          console.log(response);
+        });
+        
+      }
+      else{
+        console.log("something missing");
+          
+        response_btn = document.getElementById("response-btn"+i);
+        response_btn.className = "btn btn-danger";
+        response_btn.innerText = "404";
+        response_btn.style.display = "block";
+      }
+
+
+      
+    }
+  </script>
+  <script>
+    function addmore(i){
+      if (i > 40 ) {
+        console.log("max limit reached");
+      }
+      else{
+        j = i+1;
+        document.getElementById("table-body").innerHTML +=
+          `<tr>
+            <th scope="row">`+i+`</th>
+            <td><input type="text" class="form-control" name="chat" id="chat`+i+`" aria-describedby="emailHelp"></td>
+            <td><select id="account`+i+`" type="text" class="form-control" name="account" aria-describedby="emailHelp" placeholder="Select account" required>
+              {% for i in accounts %}
+              <option value="{{i.id}}">{{i.number}}</option>
+              {% endfor %}
+          </select></td>
+            <td><select id="group_name`+i+`" type="text" class="form-control" name="group_name" aria-describedby="emailHelp" placeholder="Enter Group Name" required>
+              {% for i in groups %}
+              <option value="{{i.group_name}}">{{i.group_name}}</option>
+              {% endfor %}
+          </select></td>
+          <td style="width: 15%;"><select id="delay`+i+`" type="number" class="form-control w-50" name="sleep_time_first" aria-describedby="emailHelp"  required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="1000">1000</option>
+            <option value="5000">5000</option>
+            <option value="10000">10000</option>
+            <option value="20000">20000</option>
+        </select></td>
+        <td><input type="datetime-local" id="birthdaytime`+i+`" class="form-control" name="datetime"></td>
+        <td><button style="display: none;" id="response-btn`+i+`" class=""></button></td>
+            <td><button id="response`+i+`" class="btn btn-dark" onclick="send(i=`+i+`)">Send</button></td>
+          </tr>`
+      document.getElementById("add-more").innerHTML =
+     `<button onclick="addmore(i=`+j+`)" class="btn btn-dark btn-sm">+</button></div>`;
+      }}
+  </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

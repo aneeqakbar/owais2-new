@@ -1,0 +1,176 @@
+{% extends 'home/admin-layout.html' %}
+{% load static %}
+
+{% load custom_tags %}
+
+
+
+{% block ExtraCss %}
+<style>
+    .chart-cont{
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 20px;
+        min-width: 500px;
+        box-shadow: 1px 1px 8px -2px rgba(0,0,0,.2);
+    }
+    #myChart{
+        min-height: 200px;
+    }
+</style>
+{% endblock ExtraCss %}
+
+{% block content %}
+
+{% block header %}
+{% endblock header %}
+
+<section class="container my-5">
+
+    <div class="row align-items-center justify-content-center">
+        <div class="col-xl-10" style="overflow: auto;">
+            <section class="chart-cont my-5">
+                <div class="row align-items-center">
+                    <div class="col-4 text-left">
+                        <div class="">
+                            <p id="custom-range-text" class="mb-0 text-muted">
+                                <small>0 Days</small>
+                            </p>
+                            <input type="range" id="custom-range" class="w-100" name="custom-range" min="1" max="1000" value="0" step="1">
+                            {% comment %} <label for="custom-range" class="lead">Custom Days</label> {% endcomment %}
+                        </div>
+                    </div>
+                    <div class="col-8 text-right">
+                        {% comment %} <a href="{% url 'ViewDataChartAnalytics' data_id=entry.id data_type=entry.type field=field %}?days=" class="btn btn-light">
+                            24H
+                        </a> {% endcomment %}
+                        <button class="btn btn-light" id='custom-range-btn'>
+                            Apply Custom Range
+                        </button>
+                        <a href="{% url 'ViewDataChartAnalytics' data_id=data.id field=field %}?days=7" class="btn btn-light">
+                            7 Days
+                        </a>
+                        <a href="{% url 'ViewDataChartAnalytics' data_id=data.id field=field %}?days=30" class="btn btn-light">
+                            1 Month
+                        </a>
+                        <a href="{% url 'ViewDataChartAnalytics' data_id=data.id field=field %}?days=365" class="btn btn-light">
+                            1 Year
+                        </a>
+                    </div>
+                </div>
+                <canvas id="myChart" width="100%"></canvas>
+            </section>
+        </div>
+    </div>
+
+</section>
+
+{% endblock content %}
+
+{% block ExtraJs %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let width, height, gradient;
+    function getGradient(ctx, chartArea) {
+        const chartWidth = chartArea.right - chartArea.left;
+        const chartHeight = chartArea.bottom - chartArea.top;
+        if (!gradient || width !== chartWidth || height !== chartHeight) {
+            // Create the gradient because this is either the first render
+            // or the size of the chart has changed
+            width = chartWidth;
+            height = chartHeight;
+            gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, "red");
+            gradient.addColorStop(0.40, "red");
+            gradient.addColorStop(0.40, "#16c784");
+            gradient.addColorStop(1, "#16c784");
+        }
+        return gradient;
+    }
+
+    const data = {
+      labels: {{chart_data.labels|safe}},
+      datasets: [{
+        label: '{{field}}',
+        backgroundColor: "#fff",
+        borderColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+    
+            if (!chartArea) {
+              // This case happens on initial chart load
+              return;
+            }
+            return getGradient(ctx, chartArea);
+        },
+        fill: false,
+        data: {{chart_data.data|safe}},
+      }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                x: {
+                  grid: {
+                    display: false,
+                    drawBorder: false,
+                    }
+                },
+                y: {
+                    grid: {
+                      drawBorder: false,
+                      color: "#ccc"
+                    }
+                }
+            },
+            elements: {
+                point: {
+                  radius: "2",
+                  pointStyle: 'circle',
+                  hoverRadius: "2",
+                }
+            }
+        }
+    }
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, config);
+</script>
+
+<script>
+    let customRange = document.getElementById("custom-range");
+    let customRangeBtn = document.getElementById("custom-range-btn");
+    let customRangeText = document.querySelector("#custom-range-text small");
+    if (customRange.value > 1) {
+        customRangeBtn.style.display = "inline-block";
+    } else {
+        customRangeBtn.style.display = "none";
+    }
+    customRange.addEventListener("change", ()=>{
+        customRangeText.innerHTML = `${customRange.value} Days`
+        if (customRange.value > 1) {
+            customRangeBtn.style.display = "inline-block";
+        } else {
+            customRangeBtn.style.display = "none";
+        }
+    })
+    customRangeBtn.addEventListener("click", ()=>{
+        window.location.href = `{% url 'ViewDataChartAnalytics' data_id=data.id field=field %}?days=${customRange.value}`;
+    })
+</script>
+
+{% endblock ExtraJs %}
