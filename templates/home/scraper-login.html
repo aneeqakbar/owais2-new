@@ -14,9 +14,9 @@
                             <div class="card-body" style="padding: 40px;">
                                 <form id="login-form" name="login-form" class="mb-0" action="." method="post">
                                     {%csrf_token%}
-                                    <p class="text-danger">
+                                    {% comment %} <p class="text-danger">
                                         The password is hardcoded its '<span class="text-success">123</span>' For now.
-                                    </p>
+                                    </p> {% endcomment %}
                                     <h3>Unlock This Data</h3>
                                     <div class="row">
                                         <div class="col-12 form-group">

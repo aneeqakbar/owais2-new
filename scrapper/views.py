@@ -528,8 +528,8 @@ class ScraperDataView(View):
         slug = request.POST.get("slug", "")
         print(code, slug)
         password = request.POST.get("password", None)
-
-        if password == "123":
+        user = get_object_or_404(User, id = request.session['userid'])
+        if password == user.password:
             request.session['scraper_access'] = f"{slug}{code}"
             url = reverse("ScraperDataView", kwargs={"slug": slug})
             return redirect(f"{url}?code={code}")
